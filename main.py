@@ -47,7 +47,10 @@ def getRecommendations(request):
         cloudTestMovies = getUserRecommendationsShort(usersMovies,model,users,moviePool, links,movieTitles)
         #cloudTestMovies =["tt0000000","tt0000001",modelProof]
         #usersMovies.extend(cloudTestMovies)
-        resultResponse = ",".join(cloudTestMovies)
+        if cloudTestMovies == "tt0000000":
+            return "No user movies match the models movies"
+        else:
+            resultResponse = ",".join(cloudTestMovies)
         return resultResponse
     
     return "missing movies"
