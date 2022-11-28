@@ -72,7 +72,7 @@ def getUserRecommendationsShort(usersMovies,model,users, moviePool, links, movie
       userSimilarityScore = np.sum(predicted_labels)
       if userSimilarityScore>bestUser:
         bestUser = user
-      break
+      #break
     print(bestUser)
     bestMovies = np.squeeze(model(torch.tensor([bestUser]*len(reccommendableMoviePool)), torch.tensor(reccommendableMoviePool)).detach().numpy())
     
