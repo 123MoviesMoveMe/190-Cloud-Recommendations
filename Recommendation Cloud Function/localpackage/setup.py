@@ -65,16 +65,16 @@ def getUserRecommendationsShort(usersMovies,model,users, moviePool, links, movie
   reccommendableMoviePool = list(set(moviePool) - set(UserModelCompatibleMovies))
 
   if len(UserModelCompatibleMovies)>0:
-    bestUser =0
-
+    bestUserID =0
+    bestUserScore = -1000000
     for user in users:
       predicted_labels = np.squeeze(model(torch.tensor([user]*len(UserModelCompatibleMovies)), torch.tensor(UserModelCompatibleMovies)).detach().numpy())
       userSimilarityScore = np.sum(predicted_labels)
-      if userSimilarityScore>bestUser:
-        bestUser = user
-      #break
-    print(bestUser)
-    bestMovies = np.squeeze(model(torch.tensor([bestUser]*len(reccommendableMoviePool)), torch.tensor(reccommendableMoviePool)).detach().numpy())
+      if userSimilarityScore>bestUserScore:
+        bestUserID = user
+        bestUserScore = userSimilarityScore
+
+    bestMovies = np.squeeze(model(torch.tensor([bestUserID]*len(reccommendableMoviePool)), torch.tensor(reccommendableMoviePool)).detach().numpy())
     
     titles = [movieTitles[movieTitles['movieId']==movie]['title'].values[0]for movie in np.argsort(bestMovies)[::-1][0:10].tolist() ]
     print(titles)
