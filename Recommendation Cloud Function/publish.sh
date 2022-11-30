@@ -1,2 +1,2 @@
-gcloud functions deploy get-recommendations --gen2 --region=us-east4 --runtime=python39 --source=. --entry-point=getRecommendations --trigger-http --verbosity=info
---memory=512
+gcloud functions deploy get-recommendation --gen2 --region=us-east4 --runtime=python39 --source=. --entry-point=getRecommendation --trigger-http --verbosity=info
+#MAKE SURE TO CD to 'Reccomendation Cloud Function' folder!
