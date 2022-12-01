@@ -58,15 +58,21 @@ def getRecommendation(request):
         pickle_in = blob.download_as_string()
         movieTitles = pickle.loads(pickle_in)
 
+        blob = bucket.blob('usersCorrespondingClusters.pkl')
+        pickle_in = blob.download_as_string()
+        usersCorrespondingClusters = pickle.loads(pickle_in)
+
         setattr(sys.modules["__main__"],'NCF',NCF)
         blob = bucket.blob('NCFRecommender1.pkl')
         pickle_in = blob.download_as_string()
         model = pickle.loads(pickle_in)
 
+        medoidUsers = [88501, 26432, 94491, 66265, 16124, 122988, 20649, 95986, 120838, 2745]
+
         # get user input and get Recommendations
         usersMovies = request_json["movies"]
 
-        recommendations = getUserRecommendationsShort(usersMovies,model,users,moviePool, links,movieTitles)
+        recommendations = getUserRecommendationsShort(usersMovies,model,users,moviePool, links,movieTitles, usersCorrespondingClusters, medoidUsers)
 
         if recommendations == "tt0000000":
             return "No user movies match the models movies",200,headers

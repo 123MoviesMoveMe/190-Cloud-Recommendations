@@ -56,8 +56,9 @@ class NCF(LightningModule):
                           batch_size=512, num_workers=4)
 
 
-def getUserRecommendationsShort(usersMovies,model,users, moviePool, links, movieTitles ):
-  # reformat data in order to be understood by model
+def getUserRecommendationsShort(usersMovies,model,users, moviePool, links, movieTitles,usersIdexCorrespondingClusters, medoidUsers):
+
+  #reformatting data
   userMoviesInts = [int(movieId[2:]) for movieId in usersMovies]
   UserModelCompatibleMovies = [(links[links['imdbId']==movieId]['movieId'].values[0]) for movieId in userMoviesInts if links['imdbId'].isin([movieId]).sum()]
 
@@ -66,18 +67,40 @@ def getUserRecommendationsShort(usersMovies,model,users, moviePool, links, movie
 
   if len(UserModelCompatibleMovies)>0:
     bestUserID =0
-    bestUserScore = -1000000
-    for user in users:
+    placeholderScore = -1000000
+    bestUserScore = placeholderScore
+
+    topCluster = 0
+    clusterID = 0
+    #iterate through medoid users.
+    for user in medoidUsers:
+      #take the highest scoring medoid user 
+      userScore = np.sum(np.squeeze(model(torch.tensor([user]*len(UserModelCompatibleMovies)), torch.tensor(UserModelCompatibleMovies)).detach().numpy()))
+      if bestUserScore == placeholderScore:
+        bestUserScore = userScore
+        topCluster = clusterID
+      elif userScore> bestUserScore:
+        bestUserScore = userScore
+        topCluster = clusterID
+      clusterID+=1
+      
+      
+    #find all users with the corresponding cluster value
+    usersFromTopCluster = [users[i] for i, x in enumerate(usersIdexCorrespondingClusters) if x == topCluster]
+
+    bestUserScore = placeholderScore
+    for user in usersFromTopCluster:
       predicted_labels = np.squeeze(model(torch.tensor([user]*len(UserModelCompatibleMovies)), torch.tensor(UserModelCompatibleMovies)).detach().numpy())
       userSimilarityScore = np.sum(predicted_labels)
       if userSimilarityScore>bestUserScore:
         bestUserID = user
         bestUserScore = userSimilarityScore
-
+    #print(bestUserScore)
+    #print(bestUserID)
     bestMovies = np.squeeze(model(torch.tensor([bestUserID]*len(reccommendableMoviePool)), torch.tensor(reccommendableMoviePool)).detach().numpy())
     
     titles = [movieTitles[movieTitles['movieId']==movie]['title'].values[0]for movie in np.argsort(bestMovies)[::-1][0:10].tolist() ]
-    print(titles)
+    #print(titles)
     top10_items = ["tt"+"0"*(7-len(str(links[links['movieId']==reccommendableMoviePool[i]]['imdbId'].values[0])))+str(links[links['movieId']==reccommendableMoviePool[i]]['imdbId'].values[0]) for i in np.argsort(bestMovies)[::-1][0:10].tolist()]
     return top10_items
   return "tt0000000"
