@@ -75,7 +75,7 @@ def getRecommendation(request):
         recommendations = getUserRecommendationsShort(usersMovies,model,users,moviePool, links,movieTitles, usersCorrespondingClusters, medoidUsers)
 
         if recommendations == "tt0000000":
-            return "No user movies match the models movies",200,headers
+            return jsonify({"problem":"No user movies match the models movies"}),200,headers
         return jsonify({"movies":recommendations}),200, headers
     
-    return "missing movies", 200, headers
+    return jsonify({"problem":"No movies were received to make a recommendation"}), 200, headers
